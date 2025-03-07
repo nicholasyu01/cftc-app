@@ -17,6 +17,15 @@ TODO:
 - compare weekly data
 - add filter options
 - add multi kpi differences 
+- add correct kpis (Positions, Changes, Percent of Open Interest, Number of Traders)
+    - Percent of Open Interest
+        - non commercial
+            - long
+            - short
+        - commercial 
+            - long
+            - short
+- deploy
 
 
 
