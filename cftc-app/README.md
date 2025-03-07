@@ -27,6 +27,45 @@ TODO:
             - short
 - deploy
 
+PALLADIUM - NEW YORK MERCANTILE EXCHANGE                                                                                                         Code-075651
+Disaggregated Commitments of Traders - Futures Only, February 25, 2025                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+     :          :                                              Reportable Positions                                                      :   Nonreportable
+     :          :  Producer/Merchant/ :                                :                                :                                :     Positions
+     :   Open   :   Processor/User    :          Swap Dealers          :         Managed Money          :       Other Reportables        :
+     : Interest :   Long   :  Short   :   Long   :  Short   :Spreading :   Long   :  Short   :Spreading :   Long   :  Short   :Spreading :   Long  :  Short
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+     :          :(CONTRACTS OF 100 TROY OUNCES)                                                                                          :
+     :          :    Positions                                                                                                           :
+All  :    18,860:     1,269      1,549      7,024        124        178      3,232     13,392        696      3,460      1,434        222:    2,779     1,265
+Old  :    18,860:     1,269      1,549      7,024        124        178      3,232     13,392        696      3,460      1,434        222:    2,779     1,265
+Other:         0:         0          0          0          0          0          0          0          0          0          0          0:        0         0
+     :          :                                                                                                                        :
+     :          :    Changes in Commitments from:       February 18, 2025                                                                :
+     :    -1,451:       373       -680        317       -592       -141       -517      2,510     -1,843        188       -336       -277:      449       -92
+     :          :                                                                                                                        :
+     :          :    Percent of Open Interest Represented by Each Category of Trader                                                     :
+All  :     100.0:       6.7        8.2       37.2        0.7        0.9       17.1       71.0        3.7       18.3        7.6        1.2:     14.7       6.7
+Old  :     100.0:       6.7        8.2       37.2        0.7        0.9       17.1       71.0        3.7       18.3        7.6        1.2:     14.7       6.7
+Other:     100.0:       0.0        0.0        0.0        0.0        0.0        0.0        0.0        0.0        0.0        0.0        0.0:      0.0       0.0
+     :          :                                                                                                                        :
+     :          :    Number of Traders in Each Category                                                                                  :
+All  :       161:         6          6         22          .         11         23         46         18         40         15          6:
+Old  :       161:         6          6         22          .         11         23         46         18         40         15          6:
+Other:         0:         0          0          0          0          0          0          0          0          0          0          0:
+     :-------------------------------------------------------------------------------------------------------------------------------------------------------
+     :             Percent of Open Interest Held by the Indicated Number of the Largest Traders
+     :                          By Gross Position                       By Net Position
+     :               4 or Less Traders     8 or Less Traders     4 or Less Traders     8 or Less Traders
+     :                 Long:     Short       Long      Short:      Long      Short       Long      Short
+     :----------------------------------------------------------------------------------------------------
+All  :                 25.6       28.9       38.6       44.2       25.5       28.8       38.4       44.2
+Old  :                 25.6       28.9       38.6       44.2       25.5       28.8       38.4       44.2
+Other:                  0.0        0.0        0.0        0.0        0.0        0.0        0.0        0.0
+
+18,860 = All long and Spreading 
+18,860 = tot_rept_positions_long_all +  nonrept_positions_long_all
+
 
 
 # Getting Started with Create React App

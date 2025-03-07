@@ -3,6 +3,23 @@ import $ from 'jquery';
 import './App.css';
 
 
+
+const columnsToInclude = [
+  "open_interest_all",
+  "pct_of_oi_noncomm_long_all",
+  "pct_of_oi_noncomm_short_all",
+  "noncomm_positions_long_all",
+  "noncomm_positions_short_all"
+];
+
+const columnLabels = {
+  commodity_name: "Commodity Name",
+  contract_market_name: "Contract Market Name",
+  cftc_contract_market_code: "CFTC Contract Market Code"
+};
+
+const staticColumns = Object.keys(columnLabels);
+
 function COTData() {
   const [data, setData] = useState(null);
   const [weeklyDifferenceData, setWeeklyDifferenceData] = useState(null);
@@ -90,87 +107,58 @@ function COTData() {
 
   const processData = (data) => {
     const groupedData = {};
-    
-    // Group data by commodity name and keep relevant information for each commodity
+  
+    // Group data by commodity name
     data.forEach((item) => {
       const date = item.report_date_as_yyyy_mm_dd.substring(0, 10);
       const commodity_name = item.commodity_name;
-
+  
       // Ensure commodity_name exists in groupedData, if not, initialize it
       if (!groupedData[commodity_name]) {
-        // groupedData[commodity_name] = {
-        //   id: item.id,
-        //   contract_market_name: item.contract_market_name,
-        //   cftc_contract_market_code: item.cftc_contract_market_code,
-        //   // Initialize a placeholder for the dates (we'll add data later)
-        //   dates: {}
-        // };
-        groupedData[commodity_name] = item;
-        groupedData[commodity_name].dates = {};
+        groupedData[commodity_name] = { ...item, dates: {} };
       }
   
-      // Store long & short positions for the date
+      // Store values for the date
       if (!groupedData[commodity_name].dates[date]) {
         groupedData[commodity_name].dates[date] = {};
       }
-
-      // Add the data for each date under the commodity
-      groupedData[commodity_name].dates[date].open_interest_all = item.open_interest_all || 0;
-
-      groupedData[commodity_name].dates[date].pct_of_oi_noncomm_long_all = item.pct_of_oi_noncomm_long_all || 0;
-      groupedData[commodity_name].dates[date].pct_of_oi_noncomm_short_all = item.pct_of_oi_noncomm_short_all || 0;
-
-      groupedData[commodity_name].dates[date].long = item.noncomm_positions_long_all || 0;
-      groupedData[commodity_name].dates[date].short = item.noncomm_positions_short_all || 0;
+  
+      // Dynamically add columns from `columnsToInclude`
+      columnsToInclude.forEach((col) => {
+        groupedData[commodity_name].dates[date][col] = item[col] || 0;
+      });
     });
   
-    // Now, calculate the weekly difference based on the stored data
+    // Calculate weekly differences
     const weeklyDifferenceData = {};
-    
+  
     Object.entries(groupedData).forEach(([commodity, dataInfo]) => {
-      const sortedDates = Object.keys(dataInfo.dates).sort(); // Sort the dates in ascending order
-      
-      // weeklyDifferenceData[commodity] = {
-      //   id: dataInfo.id,
-      //   contract_market_name: dataInfo.contract_market_name,
-      //   cftc_contract_market_code: dataInfo.cftc_contract_market_code,
-      //   differences: {}  // Store weekly differences for this commodity
-      // };
-      weeklyDifferenceData[commodity] = dataInfo;
-      weeklyDifferenceData[commodity].differences = {};
-      
+      const sortedDates = Object.keys(dataInfo.dates).sort();
+      weeklyDifferenceData[commodity] = { ...dataInfo, differences: {} };
+  
       sortedDates.forEach((date, index) => {
         if (index === 0) {
-          // For the first date, no previous data to compare, so set difference as 0
-          weeklyDifferenceData[commodity].differences[date] = { 
-            pct_of_oi_noncomm_long_all: 0,
-            pct_of_oi_noncomm_short_all: 0,
-            long: 0, short: 0 
-          };
+          // Initialize the first date with 0 difference
+          weeklyDifferenceData[commodity].differences[date] = {};
+          columnsToInclude.forEach((col) => {
+            weeklyDifferenceData[commodity].differences[date][col] = 0;
+          });
         } else {
           const prevDate = sortedDates[index - 1];
-          const difference_open_interest_all = dataInfo.dates[date].open_interest_all - dataInfo.dates[prevDate].open_interest_all;
-
-          const difference_pct_of_oi_noncomm_long_alll = dataInfo.dates[date].pct_of_oi_noncomm_long_all - dataInfo.dates[prevDate].pct_of_oi_noncomm_long_all;
-          const difference_pct_of_oi_noncomm_short_all = dataInfo.dates[date].pct_of_oi_noncomm_short_all - dataInfo.dates[prevDate].pct_of_oi_noncomm_short_all;
-
-          const differenceLong = dataInfo.dates[date].long - dataInfo.dates[prevDate].long;
-          const differenceShort = dataInfo.dates[date].short - dataInfo.dates[prevDate].short;
+          weeklyDifferenceData[commodity].differences[date] = {};
   
-          weeklyDifferenceData[commodity].differences[date] = {
-            open_interest_all: difference_open_interest_all.toFixed(2),
-            pct_of_oi_noncomm_long_all: difference_pct_of_oi_noncomm_long_alll.toFixed(2),
-            pct_of_oi_noncomm_short_all: difference_pct_of_oi_noncomm_short_all.toFixed(2),
-            long: differenceLong.toFixed(2),
-            short: differenceShort.toFixed(2),
-          };
-  
+          columnsToInclude.forEach((col) => {
+            weeklyDifferenceData[commodity].differences[date][col] = (
+              dataInfo.dates[date][col] - dataInfo.dates[prevDate][col]
+            ).toFixed(2);
+          });
         }
       });
     });
   
     return { groupedData, weeklyDifferenceData };
   };
+  
   
   
 
@@ -372,35 +360,31 @@ function COTData() {
   <table border="1">
     <thead>
       <tr>
-        <th>Commodity Name</th>
-        <th>Contract Market Name</th>
-        <th>CFTC Contract Market Code</th>
-        {Object.keys(data[Object.keys(data)[0]].dates || {}).map((date) => (
-          <>
-            <th>{date} (open_interest_all)</th>
-            <th>{date} (pct_of_oi_noncomm_long_all)</th>
-            <th>{date} (pct_of_oi_noncomm_short_all)</th>
-            <th>{date} (Long)</th>
-            <th>{date} (Short)</th>
-          </>
+        {/* Dynamic Static Columns with Labels */}
+        {staticColumns.map((col) => (
+          <th key={col}>{columnLabels[col]}</th>
         ))}
+
+        {/* Dynamic Date-Based Columns */}
+        {Object.keys(data[Object.keys(data)[0]].dates || {}).map((date) =>
+          columnsToInclude.map((col) => <th key={date + col}>{date} ({col})</th>)
+        )}
       </tr>
     </thead>
     <tbody>
       {Object.entries(data).map(([commodity, info]) => (
         <tr>
-          <td>{commodity}</td>
-          <td>{info.contract_market_name}</td>
-          <td>{info.cftc_contract_market_code}</td>
-          {Object.keys(info.dates || {}).map((date) => (
-            <>
-              <td>{info.dates[date].open_interest_all || '-'}</td>
-              <td>{info.dates[date].pct_of_oi_noncomm_long_all || '-'}</td>
-              <td>{info.dates[date].pct_of_oi_noncomm_short_all || '-'}</td>
-              <td>{info.dates[date].long || '-'}</td>
-              <td>{info.dates[date].short || '-'}</td>
-            </>
+          {/* Dynamic Static Column Values */}
+          {staticColumns.map((col) => (
+            <td>{info[col] || "-"}</td>
           ))}
+
+          {/* Dynamic Date-Based Columns */}
+          {Object.keys(info.dates || {}).map((date) =>
+            columnsToInclude.map((col) => (
+              <td>{info.dates[date][col] || '-'}</td>
+            ))
+          )}
         </tr>
       ))}
     </tbody>
@@ -411,60 +395,34 @@ function COTData() {
   <table border="1">
     <thead>
       <tr>
-        <th>Commodity Name</th>
-        <th>Contract Market Name</th>
-        <th>CFTC Contract Market Code</th>
+        {/* Dynamic Static Columns with Labels */}
+        {staticColumns.map((col) => (
+          <th key={col}>{columnLabels[col]}</th>
+        ))}
+
         {Object.keys(weeklyDifferenceData[Object.keys(weeklyDifferenceData)[0]].differences || {}).map((date) => (
-          <>
-            <th>{date} (Δ open_interest_all)</th>
-            <th>{date} (Δ pct_of_oi_noncomm_long_all)</th>
-            <th>{date} (Δ pct_of_oi_noncomm_short_all)</th>
-            <th>{date} (Δ Long)</th>
-            <th>{date} (Δ Short)</th>
-          </>
+          columnsToInclude.map((col) => <th key={date + col}>Δ {date} ({col})</th>)
         ))}
       </tr>
     </thead>
     <tbody>
-      {Object.entries(weeklyDifferenceData).map(([commodity, dataInfo]) => (
-        <tr>
-          <td>{commodity}</td>
-          <td>{dataInfo.contract_market_name}</td>
-          <td>{dataInfo.cftc_contract_market_code}</td>
-          {Object.keys(dataInfo.differences || {}).map((date) => (
-            <>
-              <td
-                className={dataInfo.differences[date].open_interest_all > 0 ? 'green' : dataInfo.differences[date].open_interest_all < 0 ? 'red' : ''}
-              >
-                {dataInfo.differences[date].open_interest_all || '-'}
-              </td>
-
-              <td
-                className={dataInfo.differences[date].pct_of_oi_noncomm_long_all > 0 ? 'green' : dataInfo.differences[date].pct_of_oi_noncomm_long_all < 0 ? 'red' : ''}
-              >
-                {dataInfo.differences[date].pct_of_oi_noncomm_long_all || '-'}
-              </td>
-              <td
-                className={dataInfo.differences[date].pct_of_oi_noncomm_short_all > 0 ? 'green' : dataInfo.differences[date].pct_of_oi_noncomm_short_all < 0 ? 'red' : ''}
-              >
-                {dataInfo.differences[date].pct_of_oi_noncomm_short_all || '-'}
-              </td>
-
-              <td
-                className={dataInfo.differences[date].long > 0 ? 'green' : dataInfo.differences[date].long < 0 ? 'red' : ''}
-              >
-                {dataInfo.differences[date].long || '-'}
-              </td>
-              <td
-                className={dataInfo.differences[date].short > 0 ? 'green' : dataInfo.differences[date].short < 0 ? 'red' : ''}
-              >
-                {dataInfo.differences[date].short || '-'}
-              </td>
-            </>
+      {Object.entries(weeklyDifferenceData).map(([commodity, info]) => (
+        <tr key={commodity}>
+          {/* Dynamic Static Column Values */}
+          {staticColumns.map((col) => (
+            <td key={commodity + col}>{info[col] || "-"}</td>
           ))}
+          {Object.keys(info.differences || {}).map((date) =>
+            columnsToInclude.map((col) => (
+              <td 
+              className={info.differences[date][col] > 0 ? 'green' : info.differences[date][col] < 0 ? 'red' : ''}
+              >{info.differences[date][col] || '-'}</td>
+            ))
+          )}
         </tr>
       ))}
     </tbody>
+
   </table>
 )}
 
