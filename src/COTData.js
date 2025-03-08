@@ -93,6 +93,11 @@ function COTData() {
       },
       success: function (result) {
         console.log(result);
+          if (result.length === 0) {
+            alert("No Data Found");
+            setLoading(false);
+            return
+          }
           const { groupedData, weeklyDifferenceData } = processData(result);
           setData(groupedData); // Set the raw data
           setWeeklyDifferenceData(weeklyDifferenceData); // Set the weekly difference data
